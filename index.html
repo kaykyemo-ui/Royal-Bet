@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Royal Bet - Casino Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              royal: {
+                900: '#020617', // Very dark blue/slate
+                800: '#0f172a',
+                700: '#1e293b',
+              },
+              neon: {
+                yellow: '#CCFF00',
+                glow: 'rgba(204, 255, 0, 0.5)',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Orbitron', 'sans-serif'],
+            },
+            boxShadow: {
+              'neon': '0 0 10px rgba(204, 255, 0, 0.3), 0 0 20px rgba(204, 255, 0, 0.2)',
+              'neon-strong': '0 0 15px rgba(204, 255, 0, 0.6), 0 0 30px rgba(204, 255, 0, 0.4)',
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #020617;
+        color: #f8fafc;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #CCFF00; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
