@@ -11,7 +11,6 @@ interface TargetGameProps {
 
 const MULTIPLIERS = [1.5, 2.0, 3.0, 5.0];
 
-// Helper to generate random coordinates for HOUSE (House is a sharpshooter)
 const getHouseCoordinates = (score: number) => {
   const maxRadius = 45; 
   const step = 4.5; 
@@ -23,13 +22,11 @@ const getHouseCoordinates = (score: number) => {
   return { x, y };
 };
 
-// Calculate Score based on distance from center (50, 50)
 const calculateScoreFromHit = (x: number, y: number): number => {
     const dx = x - 50;
     const dy = y - 50;
     const distance = Math.sqrt(dx*dx + dy*dy);
     
-    // Max radius 45% = Score 1. Center = Score 10. Step = 4.5
     if (distance > 45) return 0; // Miss
     const rawScore = 10 - Math.floor(distance / 4.5);
     return Math.max(1, Math.min(10, rawScore));
@@ -57,7 +54,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
   const [showRules, setShowRules] = useState(false);
   const [lastWin, setLastWin] = useState(0);
   
-  // Decides the outcome round start
   const [shouldPlayerWin, setShouldPlayerWin] = useState(false);
 
   const startHouseTurn = () => {
@@ -75,12 +71,10 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // --- PROBABILITY: 10% Chance to Win ---
+    // --- GAME LOGIC: 10% Chance to Win ---
     const isWin = Math.random() < 0.10;
     setShouldPlayerWin(isWin);
 
-    // House Logic: House is extremely strong to force the "near miss" narrative
-    // 50% chance of 10, 30% chance of 9, 20% chance of 8.
     const r = Math.random();
     let houseScoreVal = 10;
     if (r < 0.2) houseScoreVal = 8;
@@ -94,7 +88,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
         setGameStep('HOUSE_AIMING');
         setStatusMessage('A Casa está mirando...');
 
-        // Delay for House Shot animation
         setTimeout(() => {
             const coords = getHouseCoordinates(houseScoreVal);
             setHouseShot({ score: houseScoreVal, x: coords.x, y: coords.y, shooter: 'HOUSE' });
@@ -112,23 +105,17 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
       setGameStep('PLAYER_SHOOTING');
       setStatusMessage('Disparando...');
 
-      // 1. Get where the user actually clicked (0-100%)
       const rect = e.currentTarget.getBoundingClientRect();
       const clickX = ((e.clientX - rect.left) / rect.width) * 100;
       const clickY = ((e.clientY - rect.top) / rect.height) * 100;
 
-      // 2. Calculate what the score WOULD be without logic modification
       const potentialScore = calculateScoreFromHit(clickX, clickY);
 
       let finalX = clickX;
       let finalY = clickY;
 
-      // 3. Apply Game Logic
       if (!shouldPlayerWin) {
-         // FORCE LOSS
-         // If user aimed well enough to tie or win, we MUST deflect the shot.
          if (potentialScore >= houseShot.score) {
-             // We need to push the shot OUT to a lower ring.
              const targetMaxScore = Math.max(0, houseShot.score - 1);
              const deflectDistance = ((10 - targetMaxScore) * 4.5) + 1.5; 
 
@@ -146,7 +133,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
          }
       }
 
-      // Clamp
       finalX = Math.max(0, Math.min(100, finalX));
       finalY = Math.max(0, Math.min(100, finalY));
 
@@ -170,7 +156,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
       } else if (pScore === hScore) {
           setStatusMessage(`EMPATE! ${pScore} a ${hScore}. Ninguém ganha.`);
       } else {
-          // Messages emphasizing the "near miss"
           const diff = hScore - pScore;
           if (diff === 1) setStatusMessage(`POR POUCO! ${pScore} a ${hScore}. O vento atrapalhou.`);
           else if (diff === 2) setStatusMessage(`RASPOU! ${pScore} a ${hScore}. A Casa venceu.`);
@@ -181,7 +166,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
   return (
     <div ref={gameRef} className="w-full max-w-6xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
       
-      {/* Sidebar */}
       <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -196,7 +180,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
           TIRO AO <span className="text-neon-yellow">ALVO</span>
         </h2>
 
-         {/* Rules Modal */}
          {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -269,7 +252,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
               )}
           </div>
 
-          {/* Scores Panel */}
           <div className="grid grid-cols-2 gap-4">
               <div className={`p-3 rounded-lg border text-center transition-all ${houseShot ? 'bg-royal-800 border-red-500' : 'bg-royal-900/50 border-royal-800'}`}>
                   <p className="text-xs text-gray-400 uppercase font-bold mb-1">Casa</p>
@@ -306,17 +288,13 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
         </div>
       </div>
 
-      {/* Target Area */}
       <div className="flex-1 bg-royal-950 rounded-3xl border-8 border-royal-900 relative min-h-[500px] order-1 md:order-2 overflow-hidden flex flex-col items-center justify-center shadow-2xl p-4 cursor-default select-none">
         
-        {/* Wall Background with Depth Gradient */}
         <div className="absolute inset-0 bg-stone-900 perspective-1000">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-30"></div>
-            {/* Vignette for depth */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] opacity-90 pointer-events-none"></div>
         </div>
 
-        {/* Status Overlay */}
         <div className="absolute top-8 left-0 right-0 z-30 flex justify-center pointer-events-none">
            <div className={`
              px-6 py-2 rounded-full backdrop-blur-md border shadow-xl font-display font-bold uppercase tracking-wider transition-all duration-300
@@ -328,8 +306,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
            </div>
         </div>
 
-        {/* The Target (SVG) - Clickable Area */}
-        {/* EXTREMELY SMALL SIZE TO SIMULATE 300M DISTANCE */}
         <div 
             className={`
                 relative w-[40px] h-[40px] md:w-[60px] md:h-[60px] z-20 transition-all duration-300
@@ -339,31 +315,23 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
             onClick={handleTargetClick}
         >
             <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl">
-                {/* Target Stand Legs (Visual only) */}
                 <line x1="50" y1="50" x2="50" y2="150" stroke="#333" strokeWidth="2" />
 
-                {/* Rings */}
-                {/* Outer (White) 1-2 */}
                 <circle cx="50" cy="50" r="45" fill="#e5e5e5" stroke="#999" strokeWidth="0.5" />
                 <circle cx="50" cy="50" r="40" fill="white" stroke="#ccc" strokeWidth="0.5" />
                 
-                {/* Middle (Black) 3-4 */}
                 <circle cx="50" cy="50" r="35" fill="black" stroke="#333" strokeWidth="0.5" />
                 <circle cx="50" cy="50" r="30" fill="#262626" stroke="#444" strokeWidth="0.5" />
                 
-                {/* Inner (Blue) 5-6 */}
                 <circle cx="50" cy="50" r="25" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="0.5" />
                 <circle cx="50" cy="50" r="20" fill="#60a5fa" stroke="#2563eb" strokeWidth="0.5" />
 
-                {/* Inner (Red) 7-8 */}
                 <circle cx="50" cy="50" r="15" fill="#ef4444" stroke="#b91c1c" strokeWidth="0.5" />
                 <circle cx="50" cy="50" r="10" fill="#f87171" stroke="#dc2626" strokeWidth="0.5" />
 
-                {/* Bullseye (Yellow) 9-10 */}
                 <circle cx="50" cy="50" r="5" fill="#CCFF00" stroke="#a3cc00" strokeWidth="0.5" />
                 <circle cx="50" cy="50" r="2" fill="#d9ff40" />
 
-                {/* Crosshair Overlay (When Aiming) */}
                 {gameStep === 'HOUSE_AIMING' && (
                     <g className="animate-spin-slow origin-center opacity-50">
                         <line x1="50" y1="0" x2="50" y2="100" stroke="red" strokeWidth="0.5" strokeDasharray="2" />
@@ -373,12 +341,10 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
                 )}
             </svg>
             
-            {/* Visual Text Label "300m" to simulate distance */}
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] text-gray-500 font-mono tracking-widest bg-black/50 px-2 rounded whitespace-nowrap">
                 DISTÂNCIA: 300M
             </div>
 
-            {/* Shots rendering */}
             {houseShot && (
                 <div 
                     className="absolute w-1 h-1 md:w-1.5 md:h-1.5 bg-red-600 rounded-full border border-white shadow-sm pointer-events-none"
@@ -388,7 +354,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
                         transform: 'translate(-50%, -50%)' 
                     }}
                 >
-                    {/* Bullet Hole Graphic */}
                     <div className="absolute inset-0 bg-black opacity-30 rounded-full scale-150 blur-[1px]"></div>
                 </div>
             )}
@@ -406,7 +371,6 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
                 </div>
             )}
             
-            {/* Helper Text Overlay on Target */}
             {gameStep === 'WAITING_PLAYER' && !playerShot && (
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-pulse opacity-50">
                      <Crosshair className="text-white w-6 h-6" strokeWidth={1} />

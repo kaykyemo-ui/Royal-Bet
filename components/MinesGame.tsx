@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
-import { Input } from './Input';
-import { Diamond, Bomb, XCircle, Trophy, RefreshCw, ArrowLeft, HelpCircle, X, MessageCircle } from 'lucide-react';
+import { Diamond, Bomb, Trophy, RefreshCw, ArrowLeft, HelpCircle, X, MessageCircle } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface MinesGameProps {
@@ -63,9 +62,7 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Add a small delay for the scroll to happen before game state activates visually
     setTimeout(() => {
-      // Deduct bet immediately
       onUpdateBalance(user.balance - bet, bet);
       setIsPlaying(true);
       setIsGameOver(false);
@@ -73,8 +70,6 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
       setDiamondsFound(0);
       setShowWinButton(false);
       setStatusMessage('Boa sorte! Encontre os diamantes.');
-      
-      // Reset grid visuals
       setGrid(Array.from({ length: 25 }, (_, i) => ({ id: i, state: 'HIDDEN' })));
     }, 400);
   };
@@ -82,16 +77,16 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
   const handleTileClick = (index: number) => {
     if (!isPlaying || isGameOver || grid[index].state !== 'HIDDEN') return;
 
-    // --- PROBABILITY: 10% Chance to find a diamond (90% Bomb) ---
-    // This makes the game significantly harder as requested
+    // --- GAME LOGIC: High difficulty (10% chance to find diamond) ---
+    // User has 10% chance to reveal a diamond per click.
     const isBomb = Math.random() > 0.10; 
 
     const newGrid = [...grid];
 
     if (isBomb) {
-      // GAME OVER - LOSS
+      // GAME OVER
       newGrid[index].state = 'BOMB';
-      // Reveal other bombs randomly to make it look real
+      // Reveal random bombs for effect
       newGrid.forEach(tile => {
         if (tile.state === 'HIDDEN' && Math.random() < 0.4) {
           tile.state = 'BOMB';
@@ -104,16 +99,14 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
       setShowWinButton(false);
       setStatusMessage(`BOMBA! Você perdeu R$ ${betAmount}`);
     } else {
-      // SUCCESS - DIAMOND
+      // SUCCESS
       newGrid[index].state = 'DIAMOND';
       setGrid(newGrid);
       
       const newDiamondsFound = diamondsFound + 1;
       setDiamondsFound(newDiamondsFound);
       
-      // Calculate Win: Bet * Multiplier * DiamondsFound
       const bet = parseFloat(betAmount);
-      // Total Win = Bet * Multiplier * Count
       const currentWinValue = bet * selectedMultiplier * newDiamondsFound;
       setWinAmount(currentWinValue);
       
@@ -123,11 +116,10 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
 
   const handleCashout = () => {
     if (winAmount > 0) {
-      onUpdateBalance(user.balance + winAmount, 0); // 0 extra spent, just adding win
+      onUpdateBalance(user.balance + winAmount, 0); 
       setStatusMessage(`SAQUE REALIZADO! Ganhou R$ ${winAmount.toFixed(2)}`);
       setShowWinButton(true);
     } else {
-      // Edge case: cashout with 0 wins
       setStatusMessage('Jogo encerrado sem ganhos.');
       setShowWinButton(false);
     }
@@ -138,7 +130,6 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
   return (
     <div ref={gameRef} className="w-full max-w-5xl mx-auto animate-fade-in flex flex-col md:flex-row gap-8 scroll-mt-4">
       
-      {/* Sidebar Controls */}
       <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -153,7 +144,6 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
           MINAS DA <span className="text-neon-yellow">FORTUNA</span>
         </h2>
 
-        {/* Rules Modal */}
         {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -246,7 +236,6 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
           )}
         </div>
 
-        {/* Back Button */}
         <div className="pt-6 mt-6 border-t border-royal-700">
           <Button variant="secondary" onClick={onExit} className="flex items-center justify-center gap-2">
             <ArrowLeft size={16} /> VOLTAR AO LOBBY
@@ -254,10 +243,7 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
         </div>
       </div>
 
-      {/* Game Grid */}
       <div className="flex-1 bg-royal-800/30 rounded-2xl border border-royal-700 p-4 md:p-8 flex flex-col items-center justify-center relative min-h-[500px] order-1 md:order-2">
-        
-        {/* Status Bar */}
         <div className="mb-6 text-center h-8">
            <p className={`font-display font-bold text-lg ${isGameOver ? (statusMessage.includes('BOMBA') ? 'text-red-500' : 'text-green-500') : 'text-neon-yellow'}`}>
              {statusMessage}

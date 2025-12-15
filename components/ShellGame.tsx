@@ -21,7 +21,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
   const [lastWin, setLastWin] = useState(0);
   const [showRules, setShowRules] = useState(false);
 
-  // Helper for shuffle animation delay
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const startGame = async () => {
@@ -39,7 +38,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Delay the start slightly to allow the scroll to complete visually
     setTimeout(async () => {
         onUpdateBalance(user.balance - bet, bet);
         setLastWin(0);
@@ -49,13 +47,13 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
         setGameState('REVEAL_START');
         setStatusMessage('Observe a bola...');
 
-        await wait(1500); // Show ball for 1.5s
+        await wait(1500);
 
         setGameState('SHUFFLING');
         setStatusMessage('Misturando...');
         
         const swaps = 15; 
-        const speed = 200; // ms per swap (Fast speed)
+        const speed = 200;
         
         let currentPos = [0, 1, 2];
 
@@ -84,21 +82,15 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
   const handleCupClick = (pickedCupId: number) => {
     if (gameState !== 'PICKING') return;
 
-    // --- PROBABILITY: 10% Chance to Win ---
+    // --- GAME LOGIC: 10% Chance to Win ---
     const isWin = Math.random() < 0.10; 
 
-    // If result is determined as WIN, ensure picked cup is the winner
-    // If result is LOSS, ensure picked cup is NOT the winner
-    
-    // We adjust the `winningCupId` state to match the outcome before revealing
     let finalWinningId = winningCupId;
 
     if (isWin) {
        finalWinningId = pickedCupId;
     } else {
        if (pickedCupId === winningCupId) {
-          // If user picked the current winning cup but lost, move the ball
-          // Pick a random other cup
           const others = [0, 1, 2].filter(id => id !== pickedCupId);
           finalWinningId = others[Math.floor(Math.random() * others.length)];
        }
@@ -110,7 +102,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
     const bet = parseFloat(betAmount);
     
     if (pickedCupId === finalWinningId) {
-      // WIN
       const multiplier = 2.5;
       const win = bet * multiplier;
       setLastWin(win);
@@ -129,7 +120,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
   return (
     <div ref={gameRef} className="w-full max-w-6xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
       
-      {/* Sidebar */}
       <div className="w-full md:w-72 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -144,7 +134,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
           COPINHOS <span className="text-neon-yellow">LUCKY</span>
         </h2>
 
-        {/* Rules Modal */}
         {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -209,16 +198,12 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
         </div>
       </div>
 
-      {/* Game Table */}
       <div className="flex-1 bg-royal-800 rounded-3xl border-8 border-royal-900 relative min-h-[500px] order-1 md:order-2 overflow-hidden flex flex-col items-center shadow-2xl">
-        
-        {/* Table Felt */}
         <div className="absolute inset-0 bg-indigo-950">
            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] opacity-20 mix-blend-overlay"></div>
            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         </div>
 
-        {/* Status */}
         <div className="relative z-10 mt-12 mb-12 h-16 flex items-center justify-center w-full">
             <div className={`
                 px-8 py-3 rounded-full backdrop-blur-md border shadow-2xl font-display font-black text-xl uppercase tracking-wider transition-all duration-300
@@ -228,7 +213,6 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
             </div>
         </div>
 
-        {/* Cups Container */}
         <div className="relative w-full max-w-[600px] h-[300px] z-10 perspective-1000">
           
           {[0, 1, 2].map((cupId) => {

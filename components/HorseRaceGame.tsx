@@ -70,20 +70,19 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
         setLastWin(0);
         setStatusMessage('Eles partiram!');
 
-        // --- PROBABILITY: 10% Chance to Win ---
+        // --- GAME LOGIC: 10% Chance to Win ---
         const isWin = Math.random() < 0.10;
         
         let predeterminedWinnerIndex: number;
         if (isWin) {
-            predeterminedWinnerIndex = selectedHorseId - 1; // 0-based index
+            predeterminedWinnerIndex = selectedHorseId - 1; 
         } else {
-            // Pick random winner that is NOT the selected horse
+            // Pick a winner that is NOT the selected one
             const otherIndices = [0, 1, 2, 3, 4].filter(i => i !== (selectedHorseId - 1));
             predeterminedWinnerIndex = otherIndices[Math.floor(Math.random() * otherIndices.length)];
         }
 
         // --- RACE SIMULATION ---
-        // We will update positions every 100ms
         
         let currentPositions = [0, 0, 0, 0, 0];
         
@@ -91,24 +90,23 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
             let finished = false;
             
             const newPositions = currentPositions.map((pos, index) => {
-                // If already finished, stay there
                 if (pos >= 100) return 100;
 
-                // Base increment (random noise)
-                let increment = Math.random() * 1.5 + 0.5; // 0.5% to 2.0% per tick
+                // Base increment
+                let increment = Math.random() * 1.5 + 0.5;
 
-                // Boost the predetermined winner slightly
+                // Boost winner
                 if (index === predeterminedWinnerIndex) {
                     increment += 0.4; 
                 }
                 
-                // Catch-up logic: if winner is lagging behind too much, boost more
+                // Catch-up logic for winner
                 const maxPos = Math.max(...currentPositions);
                 if (index === predeterminedWinnerIndex && pos < maxPos - 10) {
                     increment += 1.5;
                 }
 
-                // Slow down logic: if a loser is winning near the end, slow them down
+                // Slow down logic for others
                 if (index !== predeterminedWinnerIndex && pos > 85 && pos > currentPositions[predeterminedWinnerIndex]) {
                     increment *= 0.1;
                 }
@@ -119,15 +117,14 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
             currentPositions = newPositions;
             setPositions([...currentPositions]);
 
-            // Check Finish
             const winnerIndex = currentPositions.findIndex(p => p >= 100);
             if (winnerIndex !== -1) {
                 finished = true;
                 clearInterval(raceIntervalRef.current!);
-                handleFinish(winnerIndex + 1, bet); // +1 because ID is 1-based
+                handleFinish(winnerIndex + 1, bet); 
             }
 
-        }, 50); // Tick every 50ms
+        }, 50);
 
     }, 400);
   };
@@ -146,7 +143,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
         if (raceIntervalRef.current) clearInterval(raceIntervalRef.current);
@@ -156,7 +152,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
   return (
     <div ref={gameRef} className="w-full max-w-6xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
       
-      {/* Sidebar Controls */}
       <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -171,7 +166,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
           TURFE <span className="text-neon-yellow">REAL</span>
         </h2>
 
-         {/* Rules Modal */}
          {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -283,17 +277,12 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
         </div>
       </div>
 
-      {/* Racetrack */}
       <div className="flex-1 bg-royal-950 rounded-3xl border-8 border-royal-900 relative min-h-[500px] order-1 md:order-2 overflow-hidden flex flex-col shadow-2xl">
-        
-        {/* Dirt Track Texture */}
         <div className="absolute inset-0 bg-[#3f2e18]">
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dirt-texture.png')] opacity-50"></div>
-             {/* Finish Line */}
              <div className="absolute right-[5%] top-0 bottom-0 w-8 bg-[repeating-linear-gradient(45deg,white,white_10px,black_10px,black_20px)] border-l-2 border-white/20"></div>
         </div>
 
-        {/* Status Overlay */}
         <div className="absolute top-4 left-0 right-0 z-30 flex justify-center pointer-events-none">
            <div className={`
              px-6 py-2 rounded-full backdrop-blur-md border shadow-xl font-display font-bold uppercase tracking-wider
@@ -303,7 +292,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
            </div>
         </div>
 
-        {/* Lanes */}
         <div className="flex-1 flex flex-col justify-center py-8 relative z-10">
             {HORSES.map((horse, index) => {
                 const progress = positions[index];
@@ -311,22 +299,19 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
                 
                 return (
                     <div key={horse.id} className="relative flex-1 border-b border-white/5 flex items-center px-4">
-                        {/* Lane Number */}
                         <div className="absolute left-2 text-[10px] font-bold text-white/20">{index + 1}</div>
                         
-                        {/* The Horse & Jockey */}
                         <div 
                             className="absolute transition-all duration-75 ease-linear flex flex-col items-center"
                             style={{ 
-                                left: `calc(${progress * 0.85}% + 20px)`, // Scale 0-100 to fit nicely before finish line logic
-                                zIndex: Math.floor(progress) // Simple z-index layering
+                                left: `calc(${progress * 0.85}% + 20px)`,
+                                zIndex: Math.floor(progress)
                             }}
                         >
                             <span className="text-3xl md:text-4xl filter drop-shadow-lg transform -scale-x-100" role="img" aria-label="horse">
                                 🐎
                             </span>
                             
-                            {/* Identifier Label */}
                             <div className={`
                                 text-[10px] font-bold px-1.5 rounded bg-black/50 backdrop-blur-sm border border-white/10
                                 ${horse.textColor}
@@ -336,7 +321,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
                             </div>
                         </div>
 
-                        {/* Dust Particles behind horse when moving */}
                         {isRacing && progress > 5 && progress < 95 && (
                             <div 
                                 className="absolute h-4 w-12 opacity-30"

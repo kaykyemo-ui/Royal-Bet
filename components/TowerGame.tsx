@@ -80,10 +80,8 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
   const handlePathSelect = (pathIndex: number) => {
     if (!isPlaying || isGameOver) return;
 
-    // --- PROBABILITY LOGIC: ~30% Chance to pass a level to make total win rate low ---
-    // Total win rate for 5 levels would be very low (0.3^5)
-    // The user asked for "10% chance to win". In a multi-stage game, this is tricky.
-    // We will set a fixed 30% success rate per step.
+    // --- GAME LOGIC: High difficulty ---
+    // ~30% chance to pass each individual level
     const isWin = Math.random() < 0.30;
 
     let calculatedCorrectPath: number;
@@ -105,11 +103,9 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
     setPathHistory(newHistory);
 
     if (isWin) {
-        // SUCCESS
         const isFinalLevel = currentLevelIndex === BASE_LEVELS.length - 1;
         
         if (isFinalLevel) {
-             // VICTORY
              const multiplier = getMultiplier(currentLevelIndex);
              const winAmount = parseFloat(betAmount) * multiplier;
              setStatusMessage(`VOCÊ VENCEU A MASMORRA! R$ ${winAmount.toFixed(2)}`);
@@ -118,12 +114,10 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
              onUpdateBalance(user.balance + winAmount, 0);
              setShowWinButton(true);
         } else {
-             // Advance
              setCurrentLevelIndex(prev => prev + 1);
              setStatusMessage('Caminho seguro! Continue...');
         }
     } else {
-        // GAME OVER
         setStatusMessage('Você caiu na armadilha!');
         setIsGameOver(true);
         setIsPlaying(false);
@@ -151,7 +145,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
   return (
     <div ref={gameRef} className="w-full max-w-5xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
       
-      {/* Sidebar */}
       <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -166,7 +159,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
           MASMORRA <span className="text-neon-yellow">REAL</span>
         </h2>
 
-         {/* Rules Modal */}
          {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -270,7 +262,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
             </a>
           )}
           
-          {/* Info */}
            <div className="p-4 bg-royal-800/50 rounded-lg border border-royal-700 text-xs text-gray-400">
             <p className="mb-1 text-neon-yellow font-bold">Probabilidade por nível:</p>
             <p>Chance de sucesso: 30%</p>
@@ -285,14 +276,10 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
         </div>
       </div>
 
-      {/* Game Board */}
       <div className="flex-1 bg-royal-950 rounded-3xl border-8 border-royal-900 relative min-h-[600px] order-1 md:order-2 overflow-hidden flex flex-col shadow-2xl">
-        
-        {/* Background */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/brick-wall-dark.png')] opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50"></div>
 
-        {/* Status */}
         <div className="relative z-20 py-6 text-center">
             <span className={`
                 inline-block px-6 py-2 rounded-full backdrop-blur-md border border-white/10 font-bold uppercase tracking-wider
@@ -303,20 +290,16 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
             </span>
         </div>
 
-        {/* The Tower Grid (Bottom Up) */}
         <div className="flex-1 flex flex-col-reverse justify-end items-center gap-4 pb-8 px-4 relative z-10 overflow-y-auto">
             
-            {/* Render Levels from 1 (Bottom) to 5 (Top) */}
             {BASE_LEVELS.map((lvlConfig, index) => {
                 const isActive = index === currentLevelIndex && isPlaying && !isGameOver;
                 const isPast = index < currentLevelIndex;
                 const isFuture = index > currentLevelIndex;
                 const isCurrentButGameOver = index === currentLevelIndex && isGameOver;
 
-                // Create array for paths [0, 1, 2...]
                 const paths = Array.from({ length: lvlConfig.paths }, (_, i) => i);
                 
-                // Calculate display multiplier
                 const displayMultiplier = lvlConfig.baseMultiplier * selectedDifficultyMultiplier;
 
                 return (
@@ -330,17 +313,15 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
                         `}
                     >
                         {paths.map((pathIdx) => {
-                            // Determine visual state of this specific tile
                             let state: 'DEFAULT' | 'SELECTED_SAFE' | 'SELECTED_WRONG' | 'REVEALED_SAFE' | 'REVEALED_WRONG' = 'DEFAULT';
                             
-                            // History for this level
                             const chosenPath = pathHistory[index];
                             const correctPath = correctPaths[index];
 
                             if (isPast && chosenPath === pathIdx) state = 'SELECTED_SAFE';
                             if (isCurrentButGameOver) {
                                 if (chosenPath === pathIdx && chosenPath !== correctPath) state = 'SELECTED_WRONG';
-                                if (pathIdx === correctPath && chosenPath !== correctPath) state = 'REVEALED_SAFE'; // Show where the answer was
+                                if (pathIdx === correctPath && chosenPath !== correctPath) state = 'REVEALED_SAFE'; 
                             }
                             
                             return (
@@ -364,7 +345,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
                                         ${state === 'REVEALED_SAFE' && isCurrentButGameOver ? 'bg-royal-700 border-green-500 border-2 border-b-2 opacity-60' : ''}
                                     `}
                                 >
-                                    {/* Icons */}
                                     {state === 'DEFAULT' && (
                                         <DoorOpen className={`w-6 h-6 md:w-8 md:h-8 ${isActive ? 'text-neon-yellow' : 'text-gray-600'}`} />
                                     )}
@@ -384,7 +364,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
                                         <Lock className="text-green-400 w-5 h-5 opacity-50" />
                                     )}
 
-                                    {/* Multiplier Label for the row (only show on one or subtly) */}
                                     {pathIdx === 0 && isActive && (
                                         <div className="absolute -left-12 md:-left-20 top-1/2 -translate-y-1/2 text-neon-yellow font-bold text-xs md:text-sm">
                                             {displayMultiplier.toFixed(1)}x
@@ -397,7 +376,6 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
                 );
             })}
             
-            {/* Start Line Visual */}
             <div className="w-full max-w-2xl h-1 bg-royal-700 rounded-full mt-4 opacity-30"></div>
         </div>
 

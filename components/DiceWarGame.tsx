@@ -37,7 +37,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
   const [userDie, setUserDie] = useState<number>(1);
   const [houseDie, setHouseDie] = useState<number>(1);
   
-  // These hold the pre-calculated results
   const [targetUserDie, setTargetUserDie] = useState<number>(1);
   const [targetHouseDie, setTargetHouseDie] = useState<number>(1);
 
@@ -45,7 +44,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
   const [winAmount, setWinAmount] = useState(0);
   const [showRules, setShowRules] = useState(false);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
@@ -67,22 +65,18 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // --- PROBABILITY: 10% Chance to Win ---
+    // --- GAME LOGIC: 10% Chance to Win ---
     const isWin = Math.random() < 0.10;
     
     let finalUser: number;
     let finalHouse: number;
 
     if (isWin) {
-        // User MUST be greater than House
-        // Minimum User die must be 2 (to beat 1)
         finalUser = Math.floor(Math.random() * 5) + 2; // 2 to 6
-        // House must be strictly less than User
         finalHouse = Math.floor(Math.random() * (finalUser - 1)) + 1;
     } else {
-        // User MUST be <= House (Tie or Loss)
-        finalHouse = Math.floor(Math.random() * 6) + 1; // 1 to 6
-        // User must be <= House
+        // Force Loss or Tie
+        finalHouse = Math.floor(Math.random() * 6) + 1;
         finalUser = Math.floor(Math.random() * finalHouse) + 1;
     }
 
@@ -95,13 +89,12 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
         setGameStep('HOUSE_ROLLING');
         setStatusMessage('A Casa está jogando...');
 
-        // Animate House Die
         let ticks = 0;
         intervalRef.current = window.setInterval(() => {
             setHouseDie(Math.floor(Math.random() * 6) + 1);
             ticks++;
 
-            if (ticks > 15) { // ~1.5 seconds
+            if (ticks > 15) { 
                 clearInterval(intervalRef.current!);
                 finishHouseRoll(finalHouse);
             }
@@ -120,13 +113,12 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
       setGameStep('PLAYER_ROLLING');
       setStatusMessage('Rolando seu dado...');
 
-      // Animate Player Die
       let ticks = 0;
       intervalRef.current = window.setInterval(() => {
           setUserDie(Math.floor(Math.random() * 6) + 1);
           ticks++;
 
-          if (ticks > 15) { // ~1.5 seconds
+          if (ticks > 15) { 
               clearInterval(intervalRef.current!);
               finishPlayerRoll();
           }
@@ -155,7 +147,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
   return (
     <div ref={gameRef} className="w-full max-w-5xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
        
-       {/* Sidebar */}
        <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -170,7 +161,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
           GUERRA DE <span className="text-neon-yellow">DADOS</span>
         </h2>
 
-         {/* Rules Modal */}
          {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -262,13 +252,10 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
         </div>
       </div>
 
-      {/* Game Board */}
       <div className="flex-1 bg-royal-950 rounded-3xl border-8 border-royal-900 relative min-h-[500px] order-1 md:order-2 overflow-hidden flex flex-col items-center justify-center shadow-2xl p-8">
         
-        {/* Background Texture */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/30 via-royal-950 to-black"></div>
 
-         {/* Status */}
          <div className="relative z-10 mb-12 h-16 w-full flex items-center justify-center">
              <div className={`
                  px-6 py-3 rounded-full backdrop-blur-md border shadow-xl font-display font-bold uppercase tracking-wider text-center transition-all duration-300
@@ -280,10 +267,8 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
              </div>
          </div>
 
-         {/* Arena */}
          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-24 relative z-10">
              
-             {/* User Side */}
              <div className="flex flex-col items-center gap-4">
                  <div className={`
                      w-32 h-32 md:w-40 md:h-40 bg-royal-800 rounded-2xl border-4 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-300 relative
@@ -291,7 +276,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
                  `}>
                      <DiceIcon value={userDie} className={`w-20 h-20 md:w-24 md:h-24 ${userDie > houseDie && gameStep === 'FINISHED' ? 'text-neon-yellow' : 'text-gray-300'}`} />
                      
-                     {/* Placeholder overlay when waiting */}
                      {gameStep === 'HOUSE_ROLLING' && (
                          <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center backdrop-blur-sm">
                              <span className="text-3xl animate-pulse opacity-50">?</span>
@@ -304,7 +288,6 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
                         Você
                     </span>
                     
-                    {/* BUTTON UNDER PLAYER DICE */}
                     {gameStep === 'WAITING_PLAYER' && (
                         <button 
                             onClick={startPlayerRoll}
@@ -316,12 +299,10 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
                  </div>
              </div>
 
-             {/* VS Icon */}
              <div className="text-royal-700">
                  <Swords size={48} className={gameStep === 'HOUSE_ROLLING' || gameStep === 'PLAYER_ROLLING' ? 'animate-pulse' : ''} />
              </div>
 
-             {/* House Side */}
              <div className="flex flex-col items-center gap-4">
                  <div className={`
                      w-32 h-32 md:w-40 md:h-40 bg-royal-800 rounded-2xl border-4 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-300

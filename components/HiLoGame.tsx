@@ -23,10 +23,9 @@ const MULTIPLIERS = [1.5, 2.0, 3.0, 5.0, 10.0];
 const SUITS: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
 const RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-// Value map: 2 is lowest (2), A is highest (14)
 const getCardValue = (rank: Rank): number => {
   const idx = RANKS.indexOf(rank);
-  return idx + 2; // 2..14
+  return idx + 2; 
 };
 
 const getRandomCard = (): Card => {
@@ -35,7 +34,6 @@ const getRandomCard = (): Card => {
   return { suit, rank, value: getCardValue(rank) };
 };
 
-// Generate a card that satisfies the condition
 const getForcedCard = (refValue: number, condition: 'HIGHER' | 'LOWER' | 'EQUAL'): Card => {
   let validRanks: Rank[] = [];
   
@@ -47,7 +45,6 @@ const getForcedCard = (refValue: number, condition: 'HIGHER' | 'LOWER' | 'EQUAL'
     validRanks = RANKS.filter(r => getCardValue(r) === refValue);
   }
 
-  // Fallback to random if condition impossible (should be handled by caller)
   if (validRanks.length === 0) return getRandomCard(); 
 
   const rank = validRanks[Math.floor(Math.random() * validRanks.length)];
@@ -57,7 +54,7 @@ const getForcedCard = (refValue: number, condition: 'HIGHER' | 'LOWER' | 'EQUAL'
 
 export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExit }) => {
   const gameRef = useRef<HTMLDivElement>(null);
-  const isProcessing = useRef(false); // Prevent double clicks during scroll delay
+  const isProcessing = useRef(false); 
   
   const [betAmount, setBetAmount] = useState<string>('10');
   const [selectedMultiplier, setSelectedMultiplier] = useState<number>(2.0);
@@ -79,7 +76,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
   };
 
   const handleBet = (guess: 'HIGHER' | 'LOWER') => {
-    // Prevent double triggering
     if (isPlaying || isProcessing.current) return;
 
     const bet = parseFloat(betAmount);
@@ -94,17 +90,14 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
 
     isProcessing.current = true;
 
-    // 1. Remove focus from inputs to prevent keyboard closing interruption on mobile
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
 
-    // 2. SCROLL UP LOGIC
     if (gameRef.current) {
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     
-    // 3. DELAY GAME LOGIC
     setTimeout(() => {
         setIsPlaying(true);
         setNextCard(null); 
@@ -113,9 +106,8 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
         onUpdateBalance(user.balance - bet, bet);
         setLastWin(0);
 
-        // Allow 'Revelando...' to show for a moment for suspense
         setTimeout(() => {
-            // --- PROBABILITY: 10% Chance to Win ---
+            // --- GAME LOGIC: 10% Chance to Win ---
             const rand = Math.random();
             let scenario: 'WIN' | 'LOSS' | 'TIE' = 'LOSS';
             
@@ -123,9 +115,7 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
             else if (rand < 0.20) scenario = 'TIE';
             else scenario = 'LOSS';
 
-            // Validate Scenario Feasibility
-            
-            // Impossible to WIN if Higher than Ace or Lower than 2
+            // Validate Feasibility
             if (scenario === 'WIN') {
                 if ((guess === 'HIGHER' && currentCard.value === 14) || 
                     (guess === 'LOWER' && currentCard.value === 2)) {
@@ -133,9 +123,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
                 }
             }
 
-            // Impossible to LOSE via Opposite if Higher than 2 (Opposite is Lower than 2 -> Impossible)
-            // or Lower than Ace (Opposite is Higher than Ace -> Impossible)
-            // In these cases, we default to TIE
             if (scenario === 'LOSS') {
                 if ((guess === 'HIGHER' && currentCard.value === 2) ||
                     (guess === 'LOWER' && currentCard.value === 14)) {
@@ -150,17 +137,14 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
             } else if (scenario === 'TIE') {
                 resultCard = getForcedCard(currentCard.value, 'EQUAL');
             } else {
-                // LOSS (Opposite)
                 const opposite = guess === 'HIGHER' ? 'LOWER' : 'HIGHER';
                 resultCard = getForcedCard(currentCard.value, opposite);
             }
             
-            // Fallback final safety
             if (!resultCard) resultCard = getRandomCard();
 
             setNextCard(resultCard);
             
-            // Avaliação do Resultado
             const isHigher = resultCard.value > currentCard.value;
             const isLower = resultCard.value < currentCard.value;
             const isTie = resultCard.value === currentCard.value;
@@ -183,7 +167,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
                 }
             }
 
-            // Cleanup & Reset
             setTimeout(() => {
                 setHistory(prev => [currentCard, ...prev].slice(0, 5));
                 setCurrentCard(resultCard);
@@ -230,7 +213,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
   return (
     <div ref={gameRef} className="w-full max-w-6xl mx-auto animate-fade-in flex flex-col md:flex-row gap-6 scroll-mt-4">
       
-      {/* Sidebar Controls */}
       <div className="w-full md:w-80 bg-royal-900/80 backdrop-blur-xl border border-royal-700 rounded-2xl p-6 h-fit order-2 md:order-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
            <div className="text-neon-yellow font-bold text-sm bg-royal-800 px-3 py-1 rounded-full border border-royal-700 shadow-neon">
@@ -245,7 +227,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
           DUELO <span className="text-neon-yellow">HI-LO</span>
         </h2>
 
-        {/* Rules Modal */}
         {showRules && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-royal-800 border border-royal-600 rounded-xl p-6 max-w-md w-full relative shadow-2xl">
@@ -312,7 +293,7 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
              
              <button
                onClick={() => handleBet('HIGHER')}
-               disabled={isPlaying || currentCard.value === 14 || user.balance <= 0} // Cannot bet higher than Ace
+               disabled={isPlaying || currentCard.value === 14 || user.balance <= 0} 
                className={`
                  relative w-full py-4 rounded-lg border-2 border-green-500/50 bg-green-900/20 hover:bg-green-900/40 transition-all flex justify-center items-center px-4 group
                  disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105
@@ -328,7 +309,7 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
 
              <button
                onClick={() => handleBet('LOWER')}
-               disabled={isPlaying || currentCard.value === 2 || user.balance <= 0} // Cannot bet lower than 2
+               disabled={isPlaying || currentCard.value === 2 || user.balance <= 0} 
                className={`
                  relative w-full py-4 rounded-lg border-2 border-red-500/50 bg-red-900/20 hover:bg-red-900/40 transition-all flex justify-center items-center px-4 group
                  disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105
@@ -373,16 +354,13 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
         </div>
       </div>
 
-      {/* Game Table */}
       <div className="flex-1 bg-royal-950 rounded-3xl border-8 border-royal-900 relative min-h-[500px] order-1 md:order-2 overflow-hidden flex flex-col items-center justify-center shadow-2xl p-8">
         
-        {/* Felt Texture */}
         <div className="absolute inset-0 bg-[#0f172a]">
              <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-blue-900/20 to-transparent"></div>
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         </div>
 
-        {/* Status */}
         <div className="relative z-10 mb-8 h-12 w-full flex items-center justify-center">
              <div className={`
                  px-6 py-2 rounded-full backdrop-blur-md border shadow-xl font-display font-bold uppercase tracking-wider text-center transition-all duration-300
@@ -392,23 +370,19 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
              </div>
          </div>
 
-        {/* Card Area */}
         <div className="relative z-10 flex items-center justify-center gap-4 md:gap-12 min-h-[300px]">
             
-            {/* Current Card */}
             <div className="flex flex-col items-center gap-4">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Atual</span>
                 {renderCard(currentCard, true)}
             </div>
 
-            {/* Next Card Placeholder / Result */}
             <div className="flex flex-col items-center gap-4">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Próxima</span>
                 
                 {nextCard ? (
                     renderCard(nextCard, true)
                 ) : (
-                    /* Back of Card */
                     <div className="w-32 h-48 md:w-48 md:h-72 bg-royal-800 border-4 border-royal-700 rounded-lg shadow-xl flex items-center justify-center relative animate-pulse">
                         <div className="absolute inset-2 border-2 border-dashed border-royal-600 rounded"></div>
                         <div className="w-16 h-16 rounded-full bg-royal-900 flex items-center justify-center border border-royal-700">
@@ -420,7 +394,6 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
 
         </div>
         
-        {/* History */}
         {history.length > 0 && (
             <div className="relative z-10 mt-8 flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 text-xs text-gray-500 uppercase font-bold">

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from './Button';
-import { ArrowLeft, RefreshCw, Trophy, HelpCircle, X, MessageCircle } from 'lucide-react';
+import { ArrowLeft, HelpCircle, X, MessageCircle } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface RouletteGameProps {
@@ -17,7 +17,6 @@ const WHEEL_NUMBERS = [
 // Standard European Roulette Red Numbers
 const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 
-// Helper to determine color
 const getNumberColor = (num: number): 'red' | 'black' | 'green' => {
   if (num === 0) return 'green';
   return RED_NUMBERS.includes(num) ? 'red' : 'black';
@@ -77,15 +76,17 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
       setLastWin(0);
       setStatusMessage('Girando...');
 
-      const duration = 8000 + Math.floor(Math.random() * 2000); // 8-10 seconds
+      // Random spin duration between 6s and 8s
+      const duration = 6000 + Math.floor(Math.random() * 2000);
       setSpinDuration(duration);
 
-      // --- PROBABILITY LOGIC: 10% Chance to Win ---
+      // --- GAME LOGIC: 10% Chance to Win ---
       const isWin = Math.random() < 0.10; 
       
       let targetNumber: number;
 
       if (isWin) {
+        // Find a number that results in a win
         if (selectedType === 'COLOR') {
           const targetColor = selectedValue === 'RED' ? 'red' : 'black';
           const possibleNumbers = WHEEL_NUMBERS.filter(n => getNumberColor(n) === targetColor);
@@ -94,10 +95,10 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
           targetNumber = selectedValue as number;
         }
       } else {
-        // FORCE LOSS
+        // Find a number that results in a loss
         if (selectedType === 'COLOR') {
           const targetColor = selectedValue === 'RED' ? 'black' : 'red'; 
-          // Include Green as a loss possibility
+          // Include Green (0) as a loss option for colors
           const possibleNumbers = WHEEL_NUMBERS.filter(n => {
              const c = getNumberColor(n);
              return c === targetColor || c === 'green';
@@ -109,22 +110,29 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
         }
       }
 
-      // --- ROTATION CALCULATION FOR EXACT ALIGNMENT ---
-      const sliceAngle = 360 / 37;
+      // --- CALCULATE ROTATION ---
+      // 1. Determine index of target number
       const targetIndex = WHEEL_NUMBERS.indexOf(targetNumber);
       
-      // Calculate the angle where the center of the target slice is currently located (relative to start 0)
-      const targetSliceCenterAngle = (targetIndex * sliceAngle) + (sliceAngle / 2);
+      // 2. Slice geometry
+      const sliceDeg = 360 / 37;
       
-      // We are rotating the CONTAINER counter-clockwise via CSS `rotate(-Xdeg)`.
-      // To bring `targetSliceCenterAngle` to the top (0deg), we need the CSS rotation value X
-      // to essentially equal `targetSliceCenterAngle` plus full spins.
+      // 3. The wheel starts with 0 at the top.
+      // To bring `targetIndex` to the top, we must rotate the container COUNTER-CLOCKWISE (negative degrees)
+      // by the angle corresponding to that index's position.
+      // Center of the slice is (index * sliceDeg) + (sliceDeg / 2)
+      const targetAngleOnWheel = (targetIndex * sliceDeg) + (sliceDeg / 2);
       
-      const fullSpins = 360 * 10; // 10 Full spins
+      // 4. Current rotation state (mod 360) tells us where we are roughly
+      // We want to add full spins + the difference to reach the target
+      const fullSpins = 360 * 10; // At least 10 full spins
       
-      // Calculate how much we need to add to the current rotation to reach the next target alignment
-      const currentMod = rotation % 360;
-      let angleNeeded = targetSliceCenterAngle - currentMod;
+      // Calculate how much we need to rotate FROM CURRENT POSITION to align `targetAngleOnWheel` to TOP (0deg)
+      // Since CSS rotate(-Xdeg) rotates CCW, increasing 'rotation' variable moves wheel CCW.
+      // We want `rotation % 360` to equal `targetAngleOnWheel`.
+      
+      const currentRotationMod = rotation % 360;
+      let angleNeeded = targetAngleOnWheel - currentRotationMod;
       
       // Ensure we always spin forward (positive addition)
       if (angleNeeded <= 0) {
@@ -132,8 +140,9 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
       }
       
       const finalRotationToAdd = fullSpins + angleNeeded;
+      const newRotation = rotation + finalRotationToAdd;
       
-      setRotation(prev => prev + finalRotationToAdd);
+      setRotation(newRotation);
 
       setTimeout(() => {
         setIsSpinning(false);
@@ -225,7 +234,7 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
            {/* The Wheel Container */}
            <div className="relative w-[320px] h-[320px] m-4">
              <div 
-               className="w-full h-full rounded-full border-8 border-royal-800 shadow-2xl transition-transform cubic-bezier(0.2, 0.8, 0.2, 1)"
+               className="w-full h-full rounded-full border-8 border-royal-800 shadow-2xl transition-transform cubic-bezier(0.25, 0.1, 0.25, 1)"
                style={{ 
                  transform: `rotate(-${rotation}deg)`,
                  transitionDuration: `${spinDuration}ms`,
