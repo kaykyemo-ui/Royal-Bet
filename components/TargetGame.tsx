@@ -75,7 +75,7 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // --- RIGGING LOGIC (10% Win Chance) ---
+    // --- PROBABILITY: 10% Chance to Win ---
     const isWin = Math.random() < 0.10;
     setShouldPlayerWin(isWin);
 
@@ -117,15 +117,15 @@ export const TargetGame: React.FC<TargetGameProps> = ({ user, onUpdateBalance, o
       const clickX = ((e.clientX - rect.left) / rect.width) * 100;
       const clickY = ((e.clientY - rect.top) / rect.height) * 100;
 
-      // 2. Calculate what the score WOULD be without rigging
+      // 2. Calculate what the score WOULD be without logic modification
       const potentialScore = calculateScoreFromHit(clickX, clickY);
 
       let finalX = clickX;
       let finalY = clickY;
 
-      // 3. Apply Rigging (Deviation)
+      // 3. Apply Game Logic
       if (!shouldPlayerWin) {
-         // FORCE LOSS (90% case)
+         // FORCE LOSS
          // If user aimed well enough to tie or win, we MUST deflect the shot.
          if (potentialScore >= houseShot.score) {
              // We need to push the shot OUT to a lower ring.

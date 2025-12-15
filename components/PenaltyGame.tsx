@@ -86,7 +86,7 @@ export const PenaltyGame: React.FC<PenaltyGameProps> = ({ user, onUpdateBalance,
     setStatusMessage('Chutou...');
     setLastWin(0);
 
-    // --- RIGGING LOGIC (10% Win Rate) ---
+    // --- PROBABILITY: 10% Chance to Goal ---
     const isGoal = Math.random() < 0.10; 
     
     // Determine Target Coordinates

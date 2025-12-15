@@ -166,22 +166,30 @@ export const BlackjackGame: React.FC<BlackjackGameProps> = ({ user, onUpdateBala
         
         let cardToDraw: Card;
 
-        // RIGGING ADJUSTMENT: 90% chance for dealer to "cheat"
-        const shouldDealerCheat = Math.random() < 0.90;
+        // GAME LOGIC: Dealer almost always optimizes to beat player
+        // 90% chance dealer finds the perfect card to beat player without busting if possible
+        const shouldDealerOptimize = Math.random() < 0.90;
 
-        if (shouldDealerCheat && pScore <= 21 && dScore < pScore) {
-          const targetMin = pScore - dScore; 
-          const targetMax = 21 - dScore; 
+        if (shouldDealerOptimize && pScore <= 21) {
+          // Dealer tries to find a card that makes dScore > pScore but <= 21
+          const targetMin = (pScore - dScore) + 1; // Beat player by at least 1
+          const targetMax = 21 - dScore; // Don't bust
           
-          const magicCardIndex = workingDeck.findIndex(c => {
-             const val = c.rank === 'A' ? 11 : getCardValue(c.rank); 
-             return val >= targetMin && val <= targetMax;
-          });
+          if (targetMax >= targetMin) {
+             const magicCardIndex = workingDeck.findIndex(c => {
+                const val = c.rank === 'A' ? 11 : getCardValue(c.rank); 
+                return val >= targetMin && val <= targetMax;
+             });
 
-          if (magicCardIndex !== -1) {
-             cardToDraw = workingDeck[magicCardIndex];
-             workingDeck.splice(magicCardIndex, 1);
+             if (magicCardIndex !== -1) {
+                cardToDraw = workingDeck[magicCardIndex];
+                workingDeck.splice(magicCardIndex, 1);
+             } else {
+                cardToDraw = workingDeck[0];
+                workingDeck = workingDeck.slice(1);
+             }
           } else {
+             // Can't beat without busting or drawing specific logic, draw random
              cardToDraw = workingDeck[0];
              workingDeck = workingDeck.slice(1);
           }

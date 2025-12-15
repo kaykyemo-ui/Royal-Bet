@@ -18,7 +18,6 @@ const BASE_LEVELS = [
 ];
 
 const DIFFICULTY_OPTIONS = [1.0, 2.0, 2.5, 3.0];
-const WIN_CHANCES = [0.80, 0.60, 0.40, 0.10, 0.10];
 
 export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onExit }) => {
   const gameRef = useRef<HTMLDivElement>(null);
@@ -81,10 +80,11 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
   const handlePathSelect = (pathIndex: number) => {
     if (!isPlaying || isGameOver) return;
 
-    // --- RIGGING LOGIC START ---
-    const chance = WIN_CHANCES[currentLevelIndex] || 0.10;
-    const isWin = Math.random() < chance;
-    // --- RIGGING LOGIC END ---
+    // --- PROBABILITY LOGIC: ~30% Chance to pass a level to make total win rate low ---
+    // Total win rate for 5 levels would be very low (0.3^5)
+    // The user asked for "10% chance to win". In a multi-stage game, this is tricky.
+    // We will set a fixed 30% success rate per step.
+    const isWin = Math.random() < 0.30;
 
     let calculatedCorrectPath: number;
     const pathsCount = BASE_LEVELS[currentLevelIndex].paths;
@@ -272,11 +272,8 @@ export const TowerGame: React.FC<TowerGameProps> = ({ user, onUpdateBalance, onE
           
           {/* Info */}
            <div className="p-4 bg-royal-800/50 rounded-lg border border-royal-700 text-xs text-gray-400">
-            <p className="mb-1 text-neon-yellow font-bold">Probabilidades:</p>
-            <p>Nível 1 (Ir p/ 2): 80%</p>
-            <p>Nível 2 (Ir p/ 3): 60%</p>
-            <p>Nível 3 (Ir p/ 4): 40%</p>
-            <p>Nível 4 (Ir p/ 5): 10%</p>
+            <p className="mb-1 text-neon-yellow font-bold">Probabilidade por nível:</p>
+            <p>Chance de sucesso: 30%</p>
           </div>
 
         </div>

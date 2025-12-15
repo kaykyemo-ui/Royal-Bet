@@ -115,8 +115,7 @@ export const HiLoGame: React.FC<HiLoGameProps> = ({ user, onUpdateBalance, onExi
 
         // Allow 'Revelando...' to show for a moment for suspense
         setTimeout(() => {
-            // --- RIGGING LOGIC (10% Win Rate) ---
-            // Determine desired outcome: WIN (10%), TIE (10%), LOSS (80%)
+            // --- PROBABILITY: 10% Chance to Win ---
             const rand = Math.random();
             let scenario: 'WIN' | 'LOSS' | 'TIE' = 'LOSS';
             

@@ -26,16 +26,16 @@ const getNumberColor = (num: number): 'red' | 'black' | 'green' => {
 const MULTIPLIERS = [0.5, 1.0, 2.0, 2.5, 3.0];
 
 export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalance, onExit }) => {
-  const gameRef = useRef<HTMLDivElement>(null); // Ref for scrolling
+  const gameRef = useRef<HTMLDivElement>(null);
   const [betAmount, setBetAmount] = useState<string>('10');
   const [selectedMultiplier, setSelectedMultiplier] = useState<number>(2.0);
   
   const [selectedType, setSelectedType] = useState<'COLOR' | 'NUMBER' | null>(null);
-  const [selectedValue, setSelectedValue] = useState<string | number | null>(null); // 'RED', 'BLACK' or number 0-36
+  const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
   
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [spinDuration, setSpinDuration] = useState(4000); // Default, changes dynamically
+  const [spinDuration, setSpinDuration] = useState(4000);
   const [statusMessage, setStatusMessage] = useState('Faça sua aposta');
   const [lastWin, setLastWin] = useState(0);
   const [showRules, setShowRules] = useState(false);
@@ -67,38 +67,37 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
       return;
     }
 
-    // 1. SCROLL TO VIEW FIRST
     if (gameRef.current) {
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // 2. WAIT FOR SCROLL (600ms delay), THEN SPIN
     setTimeout(() => {
-      // Deduct balance
       onUpdateBalance(user.balance - bet, bet);
       setIsSpinning(true);
       setLastWin(0);
       setStatusMessage('Girando...');
 
-      // --- DURATION (10 to 15 seconds) ---
-      // 10000ms + random(0-5000ms)
-      const duration = 10000 + Math.floor(Math.random() * 5000);
+      const duration = 8000 + Math.floor(Math.random() * 2000); // 8-10 seconds
       setSpinDuration(duration);
 
-      // --- RIGGING LOGIC ---
-      // Rule: User has 10% chance to win.
-      // We decide the outcome NOW, then animate to it.
+      // --- PROBABILITY LOGIC: 10% Chance to Win ---
+      const isWin = Math.random() < 0.10; 
       
-      const isWin = Math.random() <= 0.10; // 10% Chance
-      const isLoss = !isWin; // 90% Chance
-
       let targetNumber: number;
 
-      if (isLoss) {
+      if (isWin) {
+        if (selectedType === 'COLOR') {
+          const targetColor = selectedValue === 'RED' ? 'red' : 'black';
+          const possibleNumbers = WHEEL_NUMBERS.filter(n => getNumberColor(n) === targetColor);
+          targetNumber = possibleNumbers[Math.floor(Math.random() * possibleNumbers.length)];
+        } else {
+          targetNumber = selectedValue as number;
+        }
+      } else {
         // FORCE LOSS
         if (selectedType === 'COLOR') {
           const targetColor = selectedValue === 'RED' ? 'black' : 'red'; 
-          // We also need to consider Green (0) as a loss for colors usually
+          // Include Green as a loss possibility
           const possibleNumbers = WHEEL_NUMBERS.filter(n => {
              const c = getNumberColor(n);
              return c === targetColor || c === 'green';
@@ -108,39 +107,40 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
           const possibleNumbers = WHEEL_NUMBERS.filter(n => n !== selectedValue);
           targetNumber = possibleNumbers[Math.floor(Math.random() * possibleNumbers.length)];
         }
-      } else {
-        // FORCE WIN (10% chance)
-        if (selectedType === 'COLOR') {
-          const targetColor = selectedValue === 'RED' ? 'red' : 'black';
-          const possibleNumbers = WHEEL_NUMBERS.filter(n => getNumberColor(n) === targetColor);
-          targetNumber = possibleNumbers[Math.floor(Math.random() * possibleNumbers.length)];
-        } else {
-          targetNumber = selectedValue as number;
-        }
       }
 
-      // Animation Calculation
+      // --- ROTATION CALCULATION FOR EXACT ALIGNMENT ---
       const sliceAngle = 360 / 37;
       const targetIndex = WHEEL_NUMBERS.indexOf(targetNumber);
       
-      const offsetFromZero = targetIndex * sliceAngle;
+      // Calculate the angle where the center of the target slice is currently located (relative to start 0)
+      const targetSliceCenterAngle = (targetIndex * sliceAngle) + (sliceAngle / 2);
       
-      // NUMBER OF SPINS
-      // For 10-15 seconds, around 50-80 rotations gives good speed
-      const spins = 360 * (50 + Math.floor(Math.random() * 30));
+      // We are rotating the CONTAINER counter-clockwise via CSS `rotate(-Xdeg)`.
+      // To bring `targetSliceCenterAngle` to the top (0deg), we need the CSS rotation value X
+      // to essentially equal `targetSliceCenterAngle` plus full spins.
       
-      const randomOffset = (Math.random() - 0.5) * 4; 
+      const fullSpins = 360 * 10; // 10 Full spins
       
-      const finalRotation = spins + offsetFromZero + randomOffset;
+      // Calculate how much we need to add to the current rotation to reach the next target alignment
+      const currentMod = rotation % 360;
+      let angleNeeded = targetSliceCenterAngle - currentMod;
       
-      setRotation(prev => prev + finalRotation);
+      // Ensure we always spin forward (positive addition)
+      if (angleNeeded <= 0) {
+        angleNeeded += 360;
+      }
+      
+      const finalRotationToAdd = fullSpins + angleNeeded;
+      
+      setRotation(prev => prev + finalRotationToAdd);
 
       setTimeout(() => {
         setIsSpinning(false);
         handleResult(targetNumber, bet);
       }, duration);
 
-    }, 600); // 600ms delay to allow smooth scroll to finish/start
+    }, 600);
   };
 
   const handleResult = (landedNumber: number, bet: number) => {
@@ -225,7 +225,7 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
            {/* The Wheel Container */}
            <div className="relative w-[320px] h-[320px] m-4">
              <div 
-               className="w-full h-full rounded-full border-8 border-royal-800 shadow-2xl transition-transform cubic-bezier(0.15, 0.90, 0.25, 1)"
+               className="w-full h-full rounded-full border-8 border-royal-800 shadow-2xl transition-transform cubic-bezier(0.2, 0.8, 0.2, 1)"
                style={{ 
                  transform: `rotate(-${rotation}deg)`,
                  transitionDuration: `${spinDuration}ms`,
@@ -274,10 +274,6 @@ export const RouletteGame: React.FC<RouletteGameProps> = ({ user, onUpdateBalanc
                           className={`
                             block text-[13px] font-black tracking-tighter text-white drop-shadow-md
                           `}
-                          style={{
-                             // No rotation needed on text if we want it facing center, 
-                             // but standard european wheels often have numbers facing inward.
-                          }}
                         >
                           {num}
                         </span>

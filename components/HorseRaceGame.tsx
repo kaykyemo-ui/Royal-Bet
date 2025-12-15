@@ -70,8 +70,7 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
         setLastWin(0);
         setStatusMessage('Eles partiram!');
 
-        // --- RIGGING LOGIC ---
-        // 10% Chance to Win
+        // --- PROBABILITY: 10% Chance to Win ---
         const isWin = Math.random() < 0.10;
         
         let predeterminedWinnerIndex: number;
@@ -85,7 +84,6 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ user, onUpdateBala
 
         // --- RACE SIMULATION ---
         // We will update positions every 100ms
-        // Base speed roughly allows race to finish in ~5-8 seconds
         
         let currentPositions = [0, 0, 0, 0, 0];
         

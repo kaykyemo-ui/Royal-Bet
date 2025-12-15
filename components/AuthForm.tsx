@@ -24,8 +24,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
     if (name === 'cpf') {
       // Allow only numbers
       const numeric = value.replace(/\D/g, '');
-      // Limit to 11 digits maximum, formatting happens naturally via utils if possible
-      // but ensure we don't block typing if the user is typing fast
+      // Limit to 11 digits maximum internal, but allow format length
       const truncated = numeric.slice(0, 11);
       formattedValue = formatCPF(truncated);
     }
@@ -65,39 +64,39 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
     // Common validations logic based on mode
     if (mode === AuthMode.LOGIN) {
       const cleanCPF = (formData.cpf || '').replace(/\D/g, '');
-      if (cleanCPF.length !== 11) newErrors.cpf = 'CPF inválido (deve ter 11 dígitos)';
+      if (cleanCPF.length !== 11) newErrors.cpf = 'CPF inválido';
       if (!formData.password) newErrors.password = 'Informe sua senha';
     }
 
     if (mode === AuthMode.RECOVERY) {
        if (!formData.email || !formData.email.includes('@')) newErrors.email = 'E-mail inválido';
-       if (!formData.password || formData.password.length < 6) newErrors.password = 'A nova senha deve ter no mínimo 6 caracteres';
+       if (!formData.password || formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     }
 
     if (mode === AuthMode.REGISTER) {
-      if (!formData.fullName) newErrors.fullName = 'Nome completo é obrigatório';
+      if (!formData.fullName) newErrors.fullName = 'Nome obrigatório';
       if (!formData.email || !formData.email.includes('@')) newErrors.email = 'E-mail inválido';
       
       if (!formData.birthDate) {
-        newErrors.birthDate = 'Data de nascimento é obrigatória';
+        newErrors.birthDate = 'Data obrigatória';
       } else if (!isOver18(formData.birthDate)) {
-        newErrors.birthDate = 'Você deve ser maior de 18 anos para se cadastrar';
+        newErrors.birthDate = '+18 anos apenas';
       }
 
       // Strict CPF validation
       const cleanCPF = (formData.cpf || '').replace(/\D/g, '');
       if (cleanCPF.length !== 11) {
-        newErrors.cpf = 'CPF deve conter exatamente 11 números';
+        newErrors.cpf = 'CPF inválido';
       }
 
       // Strict Phone validation
       const cleanPhone = (formData.phone || '').replace(/\D/g, '');
       if (cleanPhone.length < 10) {
-        newErrors.phone = 'Telefone inválido (mínimo 10 números)';
+        newErrors.phone = 'Telefone inválido';
       }
 
-      if (!formData.pixKey) newErrors.pixKey = 'Chave PIX é obrigatória';
-      if (!formData.password || formData.password.length < 6) newErrors.password = 'A senha deve ter pelo menos 6 caracteres';
+      if (!formData.pixKey) newErrors.pixKey = 'Chave PIX obrigatória';
+      if (!formData.password || formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     }
 
     setErrors(newErrors);
@@ -125,7 +124,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
     setMode(newMode);
     setErrors({});
     setSuccessMessage(null);
-    setFormData(prev => ({ pixKeyType: prev.pixKeyType })); // Keep pix type default, clear others implicitly by UI but state remains partial
+    setFormData(prev => ({ pixKeyType: prev.pixKeyType })); 
   };
 
   const getTitle = () => {
@@ -210,7 +209,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
                   error={errors.birthDate}
                 />
                  <Input
-                  label="Telefone (Somente números)"
+                  label="Telefone"
                   name="phone"
                   placeholder="(00) 00000-0000"
                   value={formData.phone || ''}
@@ -226,14 +225,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
           {/* CPF Field - Only for Login and Register */}
           {mode !== AuthMode.RECOVERY && (
             <Input
-              label="CPF (Somente números)"
+              label="CPF"
               name="cpf"
               placeholder="000.000.000-00"
               value={formData.cpf || ''}
               onChange={handleInputChange}
               icon={<ShieldCheck size={18} />}
               error={errors.cpf}
-              // Removed maxLength constraint to prevent conflict with formatter
+              maxLength={14} 
               inputMode="numeric"
             />
           )}

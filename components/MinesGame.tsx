@@ -82,15 +82,9 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
   const handleTileClick = (index: number) => {
     if (!isPlaying || isGameOver || grid[index].state !== 'HIDDEN') return;
 
-    // --- RIGGING LOGIC START ---
-    // Rule: User has only 10% chance to win (find a diamond).
-    // This means 90% chance of hitting a bomb on any click.
-    
-    // 0.90 = 90% chance of Loss (Bomb)
-    // 0.10 = 10% chance of Win (Diamond)
-    const isBomb = Math.random() < 0.90;
-    
-    // --- RIGGING LOGIC END ---
+    // --- PROBABILITY: 10% Chance to find a diamond (90% Bomb) ---
+    // This makes the game significantly harder as requested
+    const isBomb = Math.random() > 0.10; 
 
     const newGrid = [...grid];
 
@@ -119,8 +113,7 @@ export const MinesGame: React.FC<MinesGameProps> = ({ user, onUpdateBalance, onE
       
       // Calculate Win: Bet * Multiplier * DiamondsFound
       const bet = parseFloat(betAmount);
-      // Formula based on prompt: "multiplying the value he bet by the multiplier he chose"
-      // Interpretation: Total Win = Bet * Multiplier * Count
+      // Total Win = Bet * Multiplier * Count
       const currentWinValue = bet * selectedMultiplier * newDiamondsFound;
       setWinAmount(currentWinValue);
       

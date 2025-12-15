@@ -67,8 +67,9 @@ export const DiceWarGame: React.FC<DiceWarGameProps> = ({ user, onUpdateBalance,
       gameRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Pre-calculate outcomes based on Rigging Logic (10% win rate)
+    // --- PROBABILITY: 10% Chance to Win ---
     const isWin = Math.random() < 0.10;
+    
     let finalUser: number;
     let finalHouse: number;
 

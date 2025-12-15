@@ -84,11 +84,32 @@ export const ShellGame: React.FC<ShellGameProps> = ({ user, onUpdateBalance, onE
   const handleCupClick = (pickedCupId: number) => {
     if (gameState !== 'PICKING') return;
 
+    // --- PROBABILITY: 10% Chance to Win ---
+    const isWin = Math.random() < 0.10; 
+
+    // If result is determined as WIN, ensure picked cup is the winner
+    // If result is LOSS, ensure picked cup is NOT the winner
+    
+    // We adjust the `winningCupId` state to match the outcome before revealing
+    let finalWinningId = winningCupId;
+
+    if (isWin) {
+       finalWinningId = pickedCupId;
+    } else {
+       if (pickedCupId === winningCupId) {
+          // If user picked the current winning cup but lost, move the ball
+          // Pick a random other cup
+          const others = [0, 1, 2].filter(id => id !== pickedCupId);
+          finalWinningId = others[Math.floor(Math.random() * others.length)];
+       }
+    }
+    
+    setWinningCupId(finalWinningId);
     setGameState('REVEAL_END');
 
     const bet = parseFloat(betAmount);
     
-    if (pickedCupId === winningCupId) {
+    if (pickedCupId === finalWinningId) {
       // WIN
       const multiplier = 2.5;
       const win = bet * multiplier;
