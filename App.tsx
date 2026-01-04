@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AuthForm } from './components/AuthForm';
 import { MinesGame } from './components/MinesGame';
@@ -9,19 +10,20 @@ import { TowerGame } from './components/TowerGame';
 import { HorseRaceGame } from './components/HorseRaceGame';
 import { DiceWarGame } from './components/DiceWarGame';
 import { TargetGame } from './components/TargetGame';
-import { HiLoGame } from './components/HiLoGame';
+import { CrashGame } from './components/CrashGame';
 import { AuthState, UserProfile, AuthMode } from './types';
-import { Crown, Zap, Dna, Gift, ShieldCheck, Target, Bomb, Spade, Trophy, Eye, HelpCircle, Castle, MoveRight, Dices, Crosshair, ArrowUpDown, User, X, CreditCard, Wallet, Trash2, AlertTriangle, Smartphone, ExternalLink, Loader2, CheckCircle, AlertCircle, RotateCcw, Upload, FileText } from 'lucide-react';
+import { Gem, Zap, ShieldCheck, Target, Bomb, Spade, Trophy, Eye, HelpCircle, Castle, MoveRight, Dices, Crosshair, Plane, User, X, CreditCard, Wallet, Trash2, AlertTriangle, Smartphone, Loader2, CheckCircle, AlertCircle, RotateCcw, Upload, FileText } from 'lucide-react';
 
-const USERS_STORAGE_KEY = 'royal_bet_users_v1';
+const USERS_STORAGE_KEY = 'onix_bet_users_v1';
 
 const DEPOSIT_OPTIONS = [
-  { amount: 1, label: 'R$ 1,00', link: 'https://mpago.la/1hsZftD', bonus: '' },
-  { amount: 5, label: 'R$ 5,00', link: 'https://mpago.la/1kto7DR', bonus: '' },
-  { amount: 10, label: 'R$ 10,00', link: 'https://mpago.la/2G4MCFx', bonus: 'POPULAR' },
-  { amount: 20, label: 'R$ 20,00', link: 'https://mpago.la/2XwGe44', bonus: '' },
-  { amount: 50, label: 'R$ 50,00', link: 'https://mpago.la/2qv6ffv', bonus: '' },
-  { amount: 100, label: 'R$ 100,00', link: 'https://mpago.la/2HuPwev', bonus: 'VIP' },
+  { amount: 5, label: 'R$ 5,00', link: 'https://mpago.la/28FoD3Q', bonus: '' },
+  { amount: 15, label: 'R$ 15,00', link: 'https://mpago.la/2mMe3nX', bonus: '' },
+  { amount: 30, label: 'R$ 30,00', link: 'https://mpago.la/31cupgc', bonus: 'POPULAR' },
+  { amount: 50, label: 'R$ 50,00', link: 'https://mpago.la/1KwS7GX', bonus: '' },
+  { amount: 100, label: 'R$ 100,00', link: 'https://mpago.la/2ZEkMbP', bonus: 'VIP' },
+  { amount: 200, label: 'R$ 200,00', link: 'https://mpago.la/1ymVmBv', bonus: '' },
+  { amount: 500, label: 'R$ 500,00', link: 'https://mpago.la/129XVSm', bonus: 'PREMIUM' },
 ];
 
 type DepositStatus = 'IDLE' | 'PROCESSING_1' | 'CHECKING' | 'UPLOAD_PROOF' | 'PROCESSING_2' | 'FAILED_RETRY';
@@ -32,16 +34,14 @@ const App: React.FC = () => {
     user: null,
   });
 
-  const [activeGame, setActiveGame] = useState<'NONE' | 'MINES' | 'ROULETTE' | 'BLACKJACK' | 'PENALTY' | 'SHELL' | 'TOWER' | 'HORSE' | 'DICE' | 'TARGET' | 'HILO'>('NONE');
+  const [activeGame, setActiveGame] = useState<'NONE' | 'MINES' | 'ROULETTE' | 'BLACKJACK' | 'PENALTY' | 'SHELL' | 'TOWER' | 'HORSE' | 'DICE' | 'TARGET' | 'CRASH'>('NONE');
   const [showProfile, setShowProfile] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Deposit Flow States
   const [depositStatus, setDepositStatus] = useState<DepositStatus>('IDLE');
   const [pendingDeposit, setPendingDeposit] = useState<{ amount: number, link: string } | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
 
-  // Logic to handle persistent authentication
   const handleAuthenticate = (mode: AuthMode, formData: Partial<UserProfile>): { success: boolean; message?: string } => {
     try {
       const storedUsersJSON = localStorage.getItem(USERS_STORAGE_KEY);
@@ -141,14 +141,11 @@ const App: React.FC = () => {
     }
   };
 
-  // --- Deposit Workflow Logic ---
-
   const handleDepositStart = (amount: number, link: string) => {
     window.open(link, '_blank');
     setPendingDeposit({ amount, link });
     setDepositStatus('PROCESSING_1');
 
-    // Simulate Payment Processing (6 seconds)
     setTimeout(() => {
       setDepositStatus('CHECKING');
     }, 6000);
@@ -169,7 +166,6 @@ const App: React.FC = () => {
 
     setDepositStatus('PROCESSING_2');
     
-    // Simulate Secondary Validation (12 seconds)
     setTimeout(() => {
       if (pendingDeposit) {
         updateBalance(authState.user!.balance + pendingDeposit.amount, 0);
@@ -204,17 +200,17 @@ const App: React.FC = () => {
                 <button
                    key={option.amount}
                    onClick={() => handleDepositStart(option.amount, option.link)}
-                   className="group relative bg-royal-800 hover:bg-green-900 border border-royal-600 hover:border-green-500 p-4 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+                   className="group relative bg-onix-800 hover:bg-accent-secondary/20 border border-onix-700 hover:border-accent-primary p-4 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
                 >
                    {option.bonus && (
-                      <span className="absolute -top-2 bg-neon-yellow text-royal-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="absolute -top-2 bg-accent-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                          {option.bonus}
                       </span>
                    )}
-                   <span className="text-white font-display font-bold text-lg group-hover:text-green-400 transition-colors">
+                   <span className="text-white font-display font-bold text-lg group-hover:text-accent-primary transition-colors">
                      {option.label}
                    </span>
-                   <div className="flex items-center gap-1 text-[10px] text-gray-500 group-hover:text-green-300/70 mt-1 uppercase tracking-wide">
+                   <div className="flex items-center gap-1 text-[10px] text-gray-500 group-hover:text-accent-primary/70 mt-1 uppercase tracking-wide">
                       <Smartphone size={10} /> Pagamento Rápido
                    </div>
                 </button>
@@ -224,8 +220,8 @@ const App: React.FC = () => {
 
       case 'PROCESSING_1':
         return (
-          <div className="bg-royal-800/50 p-8 rounded-xl border border-royal-700 flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
-            <Loader2 className="w-12 h-12 text-neon-yellow animate-spin mb-4" />
+          <div className="bg-onix-800/50 p-8 rounded-xl border border-onix-700 flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
+            <Loader2 className="w-12 h-12 text-accent-primary animate-spin mb-4" />
             <h4 className="text-white font-bold text-lg mb-2">Processando Pagamento...</h4>
             <p className="text-gray-400 text-sm">Aguarde enquanto verificamos sua transação.</p>
           </div>
@@ -233,7 +229,7 @@ const App: React.FC = () => {
 
       case 'CHECKING':
         return (
-          <div className="bg-royal-800/50 p-6 rounded-xl border border-yellow-600/50 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div className="bg-onix-800/50 p-6 rounded-xl border border-yellow-600/50 flex flex-col items-center justify-center text-center animate-fade-in">
             <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
             <h4 className="text-white font-bold text-lg mb-2">Atenção</h4>
             <p className="text-gray-300 text-sm mb-6 max-w-xs">
@@ -258,7 +254,7 @@ const App: React.FC = () => {
 
       case 'UPLOAD_PROOF':
         return (
-          <div className="bg-royal-800/50 p-6 rounded-xl border border-royal-700 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div className="bg-onix-800/50 p-6 rounded-xl border border-onix-700 flex flex-col items-center justify-center text-center animate-fade-in">
              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
                 <Upload size={24} className="text-blue-500" />
              </div>
@@ -266,20 +262,9 @@ const App: React.FC = () => {
              <p className="text-gray-300 text-sm mb-6">
                Um de nosso agentes terá que avaliar manualmente o seu pagamento, por gentileza anexe o comprovante de pagamento abaixo.
              </p>
-             
-             <input 
-               type="file" 
-               id="proof-upload" 
-               className="hidden" 
-               accept="image/*,.pdf"
-               onChange={handleFileChange}
-             />
-             
+             <input type="file" id="proof-upload" className="hidden" accept="image/*,.pdf" onChange={handleFileChange} />
              {!proofFile ? (
-               <label 
-                 htmlFor="proof-upload"
-                 className="w-full bg-royal-700 hover:bg-royal-600 border border-royal-500 border-dashed text-gray-300 font-bold py-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer mb-2"
-               >
+               <label htmlFor="proof-upload" className="w-full bg-onix-800 hover:bg-onix-700 border border-onix-700 border-dashed text-gray-300 font-bold py-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer mb-2">
                  <Upload size={20} />
                  <span className="text-xs uppercase">Clique para selecionar</span>
                </label>
@@ -290,12 +275,7 @@ const App: React.FC = () => {
                   <button onClick={() => setProofFile(null)} className="text-red-400 hover:text-red-300"><X size={16} /></button>
                </div>
              )}
-
-             <button 
-                onClick={handleProofSubmit}
-                disabled={!proofFile}
-                className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors uppercase tracking-wide"
-             >
+             <button onClick={handleProofSubmit} disabled={!proofFile} className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors uppercase tracking-wide">
                 ENVIAR COMPROVANTE
              </button>
           </div>
@@ -303,7 +283,7 @@ const App: React.FC = () => {
 
       case 'PROCESSING_2':
         return (
-          <div className="bg-royal-800/50 p-8 rounded-xl border border-green-500/30 flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
+          <div className="bg-onix-800/50 p-8 rounded-xl border border-green-500/30 flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
              <Loader2 className="w-12 h-12 text-green-500 animate-spin mb-4" />
              <h4 className="text-white font-bold text-lg mb-2">Validando Pagamento</h4>
              <p className="text-gray-400 text-sm">Isso pode levar alguns segundos...</p>
@@ -312,7 +292,7 @@ const App: React.FC = () => {
 
       case 'FAILED_RETRY':
         return (
-          <div className="bg-royal-800/50 p-6 rounded-xl border border-royal-700 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div className="bg-onix-800/50 p-6 rounded-xl border border-onix-700 flex flex-col items-center justify-center text-center animate-fade-in">
              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
                 <X size={24} className="text-red-500" />
              </div>
@@ -320,84 +300,62 @@ const App: React.FC = () => {
              <p className="text-gray-300 text-sm mb-6">
                Não se preocupe, o sistema de pagamento está instável. Tente realizar o pagamento novamente pelo link abaixo.
              </p>
-             <button 
-                onClick={handleRetry}
-                className="w-full bg-neon-yellow hover:bg-[#d9ff40] text-royal-900 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors uppercase tracking-wider shadow-neon"
-             >
+             <button onClick={handleRetry} className="w-full bg-accent-primary hover:bg-accent-secondary text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors uppercase tracking-wider shadow-accent">
                 <RotateCcw size={18} /> Tentar Novamente R$ {pendingDeposit?.amount.toFixed(2)}
              </button>
-             <button 
-               onClick={() => { setDepositStatus('IDLE'); setPendingDeposit(null); setProofFile(null); }}
-               className="mt-4 text-xs text-gray-500 hover:text-white underline"
-             >
+             <button onClick={() => { setDepositStatus('IDLE'); setPendingDeposit(null); setProofFile(null); }} className="mt-4 text-xs text-gray-500 hover:text-white underline">
                Cancelar e escolher outro valor
              </button>
           </div>
         );
-      
-      default:
-        return null;
+      default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-royal-950 text-white font-sans selection:bg-neon-yellow selection:text-royal-900 overflow-x-hidden">
+    <div className="min-h-screen bg-onix-950 text-white font-sans selection:bg-accent-primary selection:text-white overflow-x-hidden">
       
-      {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-yellow/10 rounded-full blur-[120px]"></div>
-        <div className="absolute top-[20%] right-[20%] w-[20%] h-[20%] bg-purple-900/20 rounded-full blur-[100px]"></div>
-        
-        {/* Grid Pattern Overlay */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-secondary/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-primary/10 rounded-full blur-[120px]"></div>
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]"></div>
       </div>
 
-      <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center border-b border-white/5 backdrop-blur-sm">
+      <header className="relative z-20 w-full px-6 py-4 flex justify-between items-center border-b border-white/5 backdrop-blur-sm bg-onix-950/80">
         <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setActiveGame('NONE')}>
           <div className="relative">
-            <Crown className="text-neon-yellow w-8 h-8 drop-shadow-[0_0_8px_rgba(204,255,0,0.6)]" />
-            <div className="absolute inset-0 bg-neon-yellow blur-lg opacity-30 group-hover:opacity-60 transition-opacity"></div>
+            <Gem className="text-accent-primary w-8 h-8 drop-shadow-[0_0_8px_rgba(217,70,239,0.6)]" />
+            <div className="absolute inset-0 bg-accent-primary blur-lg opacity-30 group-hover:opacity-60 transition-opacity"></div>
           </div>
           <span className="text-2xl font-display font-black tracking-tighter text-white">
-            ROYAL<span className="text-neon-yellow">BET</span>
+            ONIX<span className="text-accent-primary">BET</span>
           </span>
         </div>
         
         {authState.isAuthenticated && authState.user && (
            <div className="flex items-center gap-4">
               <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs text-gray-400">Saldo</span>
-                <span className="text-neon-yellow font-display font-bold">R$ {authState.user.balance.toFixed(2)}</span>
+                <span className="text-xs text-gray-500">Saldo</span>
+                <span className="text-accent-primary font-display font-bold">R$ {authState.user.balance.toFixed(2)}</span>
               </div>
-              
-              <button 
-                onClick={() => { setShowProfile(true); setIsDeleting(false); setDepositStatus('IDLE'); setProofFile(null); }}
-                className="p-2 rounded-full bg-royal-800 border border-royal-700 text-gray-300 hover:text-white hover:border-neon-yellow transition-all"
-                title="Minha Conta"
-              >
+              <button onClick={() => { setShowProfile(true); setIsDeleting(false); setDepositStatus('IDLE'); setProofFile(null); }} className="p-2 rounded-full bg-onix-800 border border-onix-700 text-gray-300 hover:text-white hover:border-accent-primary transition-all shadow-accent">
                 <User size={20} />
               </button>
-
-              <button 
-                onClick={handleLogout}
-                className="px-4 py-2 rounded border border-royal-700 hover:border-red-500 hover:text-red-500 text-sm transition-colors"
-              >
+              <button onClick={handleLogout} className="px-4 py-2 rounded border border-onix-700 hover:border-red-500 hover:text-red-500 text-sm transition-colors">
                 Sair
               </button>
            </div>
         )}
       </header>
 
-      {/* Profile Modal */}
       {showProfile && authState.user && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-           <div className="bg-royal-900 border border-royal-700 rounded-2xl w-full max-w-md relative shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+           <div className="bg-onix-900 border border-onix-700 rounded-2xl w-full max-md relative shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                  <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-display font-bold text-white flex items-center gap-2">
-                      <User className="text-neon-yellow" /> Minha Conta
+                      <User className="text-accent-primary" /> Minha Conta
                     </h3>
                     <button onClick={() => setShowProfile(false)} className="text-gray-400 hover:text-white">
                       <X size={24} />
@@ -405,11 +363,11 @@ const App: React.FC = () => {
                  </div>
 
                  <div className="space-y-4 mb-8">
-                    <div className="bg-royal-800 p-4 rounded-lg">
+                    <div className="bg-onix-800 p-4 rounded-lg">
                       <p className="text-xs text-gray-500 uppercase font-bold">Nome Completo</p>
                       <p className="text-white font-bold">{authState.user.fullName}</p>
                     </div>
-                    <div className="bg-royal-800 p-4 rounded-lg flex justify-between">
+                    <div className="bg-onix-800 p-4 rounded-lg flex justify-between">
                        <div>
                           <p className="text-xs text-gray-500 uppercase font-bold">CPF</p>
                           <p className="text-white">{authState.user.cpf}</p>
@@ -420,42 +378,35 @@ const App: React.FC = () => {
                        </div>
                     </div>
                     
-                    <div className="bg-gradient-to-r from-royal-800 to-royal-700 p-6 rounded-xl border border-royal-600 relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-onix-800 to-onix-900 p-6 rounded-xl border border-onix-700 relative overflow-hidden">
                        <div className="relative z-10">
                           <p className="text-xs text-gray-400 uppercase font-bold mb-1 flex items-center gap-2">
                              <Wallet size={14} /> Saldo Disponível
                           </p>
-                          <p className="text-3xl font-display font-bold text-neon-yellow">R$ {authState.user.balance.toFixed(2)}</p>
+                          <p className="text-3xl font-display font-bold text-accent-primary">R$ {authState.user.balance.toFixed(2)}</p>
                        </div>
-                       <div className="absolute right-[-20px] top-[-20px] opacity-10">
-                          <Crown size={100} />
+                       <div className="absolute right-[-20px] top-[-20px] opacity-5">
+                          <Gem size={100} />
                        </div>
                     </div>
                  </div>
 
                  <div className="mb-2">
                     <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
-                       <CreditCard size={16} className="text-neon-yellow" /> Adicionar Saldo (PIX)
+                       <CreditCard size={16} className="text-accent-primary" /> Adicionar Saldo (PIX)
                     </h4>
-                    
-                    {/* Dynamic Deposit Section */}
                     {renderDepositContent()}
-
                  </div>
                  
                  {depositStatus === 'IDLE' && (
                     <p className="text-center text-xs text-gray-500 mb-6 flex items-center justify-center gap-1">
-                      <ShieldCheck size={12} /> Processado via Mercado Pago
+                      <ShieldCheck size={12} /> Pagamentos via OnixPay
                     </p>
                  )}
 
-                 {/* Danger Zone - Always visible at bottom */}
-                 <div className="border-t border-royal-700 pt-6 mt-4 pb-4">
+                 <div className="border-t border-onix-800 pt-6 mt-4 pb-4">
                     {!isDeleting ? (
-                      <button 
-                        onClick={() => setIsDeleting(true)}
-                        className="w-full flex items-center justify-center gap-2 text-red-500 text-sm font-bold hover:text-red-400 transition-colors py-2"
-                      >
+                      <button onClick={() => setIsDeleting(true)} className="w-full flex items-center justify-center gap-2 text-red-500 text-sm font-bold hover:text-red-400 transition-colors py-2">
                         <Trash2 size={16} /> EXCLUIR CONTA
                       </button>
                     ) : (
@@ -465,75 +416,51 @@ const App: React.FC = () => {
                            <div>
                              <h4 className="text-white font-bold text-sm">Tem certeza?</h4>
                              <p className="text-red-200 text-xs mt-1 leading-relaxed">
-                               Se tiver algum valor para sacar, faça o saque antes de encerrar a conta ou <strong>o saldo será perdido permanentemente.</strong>
+                               O encerramento da conta resultará na <strong>perda permanente do saldo.</strong>
                              </p>
                            </div>
                         </div>
                         <div className="flex gap-3">
-                           <button 
-                             onClick={() => setIsDeleting(false)}
-                             className="flex-1 py-2 rounded bg-royal-700 text-white text-xs font-bold hover:bg-royal-600"
-                           >
-                             CANCELAR
-                           </button>
-                           <button 
-                             onClick={handleDeleteAccount}
-                             className="flex-1 py-2 rounded bg-red-600 text-white text-xs font-bold hover:bg-red-700 shadow-lg"
-                           >
-                             CONFIRMAR EXCLUSÃO
-                           </button>
+                           <button onClick={() => setIsDeleting(false)} className="flex-1 py-2 rounded bg-onix-800 text-white text-xs font-bold hover:bg-onix-700">CANCELAR</button>
+                           <button onClick={handleDeleteAccount} className="flex-1 py-2 rounded bg-red-600 text-white text-xs font-bold hover:bg-red-700 shadow-lg">CONFIRMAR</button>
                         </div>
                       </div>
                     )}
                  </div>
-
               </div>
            </div>
         </div>
       )}
 
       <main className="relative z-10 container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
-        
         {!authState.isAuthenticated ? (
           <div className="w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-            
-            {/* Left Side Content (Hero Text) */}
             <div className="hidden lg:block flex-1 space-y-8 max-w-xl">
-              <h1 className="text-6xl font-display font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-500">
-                A Sorte Está <br/>
-                <span className="text-neon-yellow drop-shadow-[0_0_15px_rgba(204,255,0,0.4)]">Ao Seu Lado</span>
+              <h1 className="text-6xl font-display font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-gray-500">
+                O Prestígio da <br/>
+                <span className="text-accent-primary drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">Aposta Online</span>
               </h1>
               <p className="text-gray-400 text-lg leading-relaxed">
-                Entre no mundo da Royal Bet. Slots exclusivos, cassino ao vivo e pagamentos instantâneos via PIX. Cadastre-se agora.
+                Bem-vindo à Onixbet. O destino final para jogadores que buscam elite, slots exclusivos e pagamentos instantâneos.
               </p>
-              
               <div className="flex gap-6 mt-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-royal-800 flex items-center justify-center border border-royal-700">
-                    <Zap className="text-neon-yellow" size={24} />
+                  <div className="w-12 h-12 rounded-full bg-onix-800 flex items-center justify-center border border-onix-700">
+                    <Zap className="text-accent-primary" size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-bold">Saque Rápido</h3>
-                    <p className="text-xs text-gray-500">Receba via PIX em segundos</p>
-                  </div>
+                  <div><h3 className="font-bold">Saque Onix</h3><p className="text-xs text-gray-500">Receba em segundos</p></div>
                 </div>
                 <div className="flex items-center gap-3">
-                   <div className="w-12 h-12 rounded-full bg-royal-800 flex items-center justify-center border border-royal-700">
-                    <ShieldCheck className="text-blue-400" size={24} />
+                   <div className="w-12 h-12 rounded-full bg-onix-800 flex items-center justify-center border border-onix-700">
+                    <ShieldCheck className="text-accent-secondary" size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-bold">100% Seguro</h3>
-                    <p className="text-xs text-gray-500">Dados criptografados</p>
-                  </div>
+                  <div><h3 className="font-bold">Segurança Máxima</h3><p className="text-xs text-gray-500">Criptografia de ponta</p></div>
                 </div>
               </div>
             </div>
-
-            {/* Right Side Form */}
             <div className="w-full flex-1">
                <AuthForm onAuthenticate={handleAuthenticate} />
             </div>
-
           </div>
         ) : (
           <>
@@ -541,255 +468,54 @@ const App: React.FC = () => {
               <div className="w-full max-w-6xl animate-fade-in">
                  <div className="text-center mb-12">
                     <h2 className="text-4xl font-display font-bold mb-4">
-                      Olá, <span className="text-neon-yellow">{authState.user?.fullName?.split(' ')[0] || 'Jogador'}</span>
+                      Olá, <span className="text-accent-primary">{authState.user?.fullName?.split(' ')[0] || 'Jogador'}</span>
                     </h2>
-                    <p className="text-gray-400">Escolha seu jogo e comece a ganhar.</p>
+                    <p className="text-gray-400">Seu império de apostas começa aqui.</p>
                  </div>
-
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                    {/* Mines Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('MINES')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-pink-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Bomb size={32} className="text-neon-yellow" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Campo Minado</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Roulette Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('ROULETTE')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Target size={32} className="text-red-500" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Roleta</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Blackjack Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('BLACKJACK')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Spade size={32} className="text-blue-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Blackjack 21</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Penalty Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('PENALTY')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Trophy size={32} className="text-emerald-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Pênalti Pro</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Shell Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('SHELL')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <HelpCircle size={32} className="text-yellow-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Copinhos</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Tower Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('TOWER')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Castle size={32} className="text-purple-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Masmorra</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                     {/* Horse Race Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('HORSE')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <MoveRight size={32} className="text-orange-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Corrida</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Dice War Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('DICE')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Dices size={32} className="text-indigo-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Guerra de Dados</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                    {/* Target Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('TARGET')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <Crosshair size={32} className="text-red-500" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Tiro ao Alvo</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
-                     {/* Hi-Lo Game Card */}
-                    <div 
-                      onClick={() => setActiveGame('HILO')}
-                      className="group relative overflow-hidden rounded-2xl border border-royal-700 bg-royal-800/50 hover:border-neon-yellow/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-teal-900/50 to-transparent opacity-50"></div>
-                        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
-                          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                            <ArrowUpDown size={32} className="text-teal-400" />
-                          </div>
-                          <h3 className="font-display font-bold text-lg">Duelo Hi-Lo</h3>
-                          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-neon-yellow hover:text-black hover:border-neon-yellow transition-all text-xs font-bold uppercase tracking-wide">
-                            Jogar
-                          </button>
-                        </div>
-                    </div>
-
+                    <GameCard title="Campo Minado" icon={<Bomb size={32} />} color="from-purple-900/50" onClick={() => setActiveGame('MINES')} />
+                    <GameCard title="Roleta" icon={<Target size={32} />} color="from-fuchsia-900/50" onClick={() => setActiveGame('ROULETTE')} />
+                    <GameCard title="Blackjack" icon={<Spade size={32} />} color="from-violet-900/50" onClick={() => setActiveGame('BLACKJACK')} />
+                    <GameCard title="Pênalti" icon={<Trophy size={32} />} color="from-indigo-900/50" onClick={() => setActiveGame('PENALTY')} />
+                    <GameCard title="Copinhos" icon={<HelpCircle size={32} />} color="from-zinc-900/50" onClick={() => setActiveGame('SHELL')} />
+                    <GameCard title="Masmorra" icon={<Castle size={32} />} color="from-pink-900/50" onClick={() => setActiveGame('TOWER')} />
+                    <GameCard title="Corrida" icon={<MoveRight size={32} />} color="from-slate-900/50" onClick={() => setActiveGame('HORSE')} />
+                    <GameCard title="Dados" icon={<Dices size={32} />} color="from-purple-800/50" onClick={() => setActiveGame('DICE')} />
+                    <GameCard title="Alvo" icon={<Crosshair size={32} />} color="from-fuchsia-800/50" onClick={() => setActiveGame('TARGET')} />
+                    <GameCard title="Onix Fly" icon={<Plane size={32} className="rotate-[-45deg]" />} color="from-accent-primary/20" onClick={() => setActiveGame('CRASH')} />
                  </div>
               </div>
-            ) : activeGame === 'MINES' ? (
-              <MinesGame 
-                user={authState.user!} 
-                onUpdateBalance={updateBalance} 
-                onExit={() => setActiveGame('NONE')}
-              />
-            ) : activeGame === 'ROULETTE' ? (
-              <RouletteGame 
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-              />
-            ) : activeGame === 'BLACKJACK' ? (
-               <BlackjackGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            ) : activeGame === 'PENALTY' ? (
-              <PenaltyGame 
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-              />
-            ) : activeGame === 'SHELL' ? (
-               <ShellGame 
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-              />
-            ) : activeGame === 'TOWER' ? (
-               <TowerGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            ) : activeGame === 'HORSE' ? (
-                <HorseRaceGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            ) : activeGame === 'DICE' ? (
-                <DiceWarGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            ) : activeGame === 'TARGET' ? (
-                <TargetGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            ) : (
-                <HiLoGame
-                user={authState.user!}
-                onUpdateBalance={updateBalance}
-                onExit={() => setActiveGame('NONE')}
-               />
-            )}
+            ) : activeGame === 'MINES' ? <MinesGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'ROULETTE' ? <RouletteGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'BLACKJACK' ? <BlackjackGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'PENALTY' ? <PenaltyGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'SHELL' ? <ShellGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'TOWER' ? <TowerGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'HORSE' ? <HorseRaceGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'DICE' ? <DiceWarGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                activeGame === 'TARGET' ? <TargetGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} /> :
+                <CrashGame user={authState.user!} onUpdateBalance={updateBalance} onExit={() => setActiveGame('NONE')} />}
           </>
         )}
-
       </main>
-
-      <footer className="relative z-20 py-8 text-center text-gray-600 text-sm border-t border-white/5 bg-royal-950">
-        <p>© 2024 Royal Bet. Jogue com responsabilidade. +18</p>
+      <footer className="relative z-20 py-8 text-center text-gray-600 text-sm border-t border-white/5 bg-onix-950">
+        <p>© 2024 Onixbet. Jogue com responsabilidade. +18</p>
       </footer>
     </div>
   );
 };
+
+const GameCard = ({ title, icon, color, onClick }: any) => (
+    <div onClick={onClick} className="group relative overflow-hidden rounded-2xl border border-onix-800 bg-onix-900/50 hover:border-accent-primary/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div className={`absolute inset-0 bg-gradient-to-br ${color} to-transparent opacity-50`}></div>
+        <div className="relative p-6 flex flex-col items-center justify-center min-h-[200px] gap-4">
+          <div className="p-4 rounded-full bg-black/30 group-hover:scale-110 transition-transform duration-300 shadow-lg text-accent-primary">
+            {icon}
+          </div>
+          <h3 className="font-display font-bold text-lg">{title}</h3>
+          <button className="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-accent-primary hover:text-white hover:border-accent-primary transition-all text-xs font-bold uppercase tracking-wide">Jogar</button>
+        </div>
+    </div>
+);
 
 export default App;

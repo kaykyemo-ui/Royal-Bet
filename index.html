@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Royal Bet - Casino Online</title>
+    <title>Onixbet - O Cassino de Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script>
@@ -11,14 +11,16 @@
         theme: {
           extend: {
             colors: {
-              royal: {
-                900: '#020617', // Very dark blue/slate
-                800: '#0f172a',
-                700: '#1e293b',
+              onix: {
+                950: '#09090b', // Deep black/zinc
+                900: '#18181b',
+                800: '#27272a',
+                700: '#3f3f46',
               },
-              neon: {
-                yellow: '#CCFF00',
-                glow: 'rgba(204, 255, 0, 0.5)',
+              accent: {
+                primary: '#d946ef', // Fuchsia/Electric Purple
+                secondary: '#a855f7', // Purple
+                glow: 'rgba(217, 70, 239, 0.5)',
               }
             },
             fontFamily: {
@@ -26,8 +28,8 @@
               display: ['Orbitron', 'sans-serif'],
             },
             boxShadow: {
-              'neon': '0 0 10px rgba(204, 255, 0, 0.3), 0 0 20px rgba(204, 255, 0, 0.2)',
-              'neon-strong': '0 0 15px rgba(204, 255, 0, 0.6), 0 0 30px rgba(204, 255, 0, 0.4)',
+              'accent': '0 0 10px rgba(217, 70, 239, 0.3), 0 0 20px rgba(217, 70, 239, 0.2)',
+              'accent-strong': '0 0 15px rgba(217, 70, 239, 0.6), 0 0 30px rgba(217, 70, 239, 0.4)',
             }
           },
         },
@@ -35,7 +37,7 @@
     </script>
     <style>
       body {
-        background-color: #020617;
+        background-color: #09090b;
         color: #f8fafc;
       }
       /* Custom Scrollbar */
@@ -43,25 +45,25 @@
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #0f172a; 
+        background: #18181b; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155; 
+        background: #3f3f46; 
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #CCFF00; 
+        background: #d946ef; 
       }
     </style>
   <script type="importmap">
 {
   "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
